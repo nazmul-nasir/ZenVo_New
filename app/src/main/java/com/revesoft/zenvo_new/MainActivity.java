@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         DownloadBroadcastImage downloadBroadcastImage = new DownloadBroadcastImage();
-
+        // parameters : fileName, username,password
         downloadBroadcastImage.execute("36006_1452831040961AOMcVK0djIWnr0DJFcOoH0EFXJ9YNnncCkSvzFdZ.jpg",
                 "8801814655953",
                 "7ZGe55b5348y968"
