@@ -1,6 +1,8 @@
 package com.revesoft.zenvo_new;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,6 +33,7 @@ public class DownloadBroadcastImage extends AsyncTask<String, String, String> {
     public static final String UPLOAD_COMPLETE = "uploadComplete";
     public static final String DOWNLOAD_COMPLETE = "downloadComplete";
     private Context mContext;
+    private LocalBroadcastManager mLocalBroadcastManager;
     private static final String REQUEST_TYPE_NONCE = "getNonce";
 
     private static final int RESPONSE_TYPE_UPLOAD_SUCCESSFULL = 0;
@@ -52,6 +55,30 @@ public class DownloadBroadcastImage extends AsyncTask<String, String, String> {
 
     private static final String TAG = "Nasir";
 
+    private String call_id=null;
+    private String path=null;
+    private String savingStatus="unsaved";
+
+    public DownloadBroadcastImage(Context context) {
+        mContext = context;
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+    }
+
+    @Override
+    protected void onPostExecute(String s) {
+        super.onPostExecute(s);
+       // Context context= g;
+
+        Intent intent = new Intent("image-broadcast-data");
+        // You can also include some extra data.
+        intent.putExtra("path", path);
+        intent.putExtra("call_id", call_id);
+        intent.putExtra("savingStatus",savingStatus);
+        mLocalBroadcastManager.sendBroadcast(intent);
+
+
+    }
+
     @Override
     protected String doInBackground(String... params) {
         URL url = null;
@@ -60,6 +87,8 @@ public class DownloadBroadcastImage extends AsyncTask<String, String, String> {
         String fileName = params[0];
         String username = params[1];
         String password = params[2];
+         call_id = params[3];
+        Log.i(TAG,call_id);
         try {
             HttpResponse response1 = null;
             int statusCode = -1;
@@ -116,10 +145,16 @@ public class DownloadBroadcastImage extends AsyncTask<String, String, String> {
 
             } else if (entity != null) {
                 InputStream instream = entity.getContent();
+
+                File dest = new File("/storage/emulated/0/ZenVo/");
+                if (!dest.exists()) {
+                    dest.mkdirs();
+                }
                 File dir = new File("/storage/emulated/0/ZenVo/");
                 File[] files = dir.listFiles();
                 int numberOfFiles = files.length + 1;
-                String path = "/storage/emulated/0/ZenVo/" + numberOfFiles + ".jpg";
+               // path = "/storage/emulated/0/ZenVo/" + numberOfFiles + ".jpg";
+                path = "/storage/emulated/0/ZenVo/" + fileName;
                 FileOutputStream output = new FileOutputStream(path);
                 int bufferSize = 1024;
                 byte[] buffer = new byte[bufferSize];
@@ -128,6 +163,7 @@ public class DownloadBroadcastImage extends AsyncTask<String, String, String> {
                     output.write(buffer, 0, len);
                 }
                 output.close();
+                savingStatus="saved";
             } else {
                 Log.i(TAG, "Image Download Failed");
             }
